@@ -342,10 +342,42 @@ taglist.buttons = awful.util.table.join(
     awful.button({ modkey }, 1, awful.client.movetotag),
     awful.button({ },        3, awful.tag.viewtoggle),
     awful.button({ modkey }, 3, awful.client.toggletag),
-    awful.button({ },        4, awful.tag.viewnext),
-    awful.button({ },        5, awful.tag.viewprev
-))
+	awful.button({ }, 4, function(t) awful.tag.viewnext(awful.tag.getscreen(t)) end),
+	awful.button({ }, 5, function(t) awful.tag.viewprev(awful.tag.getscreen(t)) end)
+--     awful.button({ },        4, awful.tag.viewnext),
+--     awful.button({ },        5, awful.tag.viewprev)
+)
 
+tasklist = {}
+tasklist.buttons = awful.util.table.join(
+  awful.button({ }, 1, function(c)
+      if c == client.focus then
+        c.minimized = true
+      else
+        c.minimized = false
+        if not c:isvisible() then
+          awful.tag.viewonly(c:tags()[1])
+        end
+        client.focus = c
+        c:raise()
+      end
+    end),
+  awful.button({ }, 3, function()
+      if instance then
+        instance:hide()
+        instance = nil
+      else
+        instance = awful.menu.clients({ width=250 })
+      end
+    end),
+  awful.button({ }, 4, function()
+      awful.client.focus.byidx(1)
+      if client.focus then client.focus:raise() end
+    end),
+  awful.button({ }, 5, function()
+      awful.client.focus.byidx(-1)
+      if client.focus then client.focus:raise() end
+    end))
 
 for s = 1, screen.count() do
     -- Create a promptbox
@@ -361,10 +393,14 @@ for s = 1, screen.count() do
 
     -- Create the taglist
     taglist[s] = awful.widget.taglist(s, awful.widget.taglist.filter.all, taglist.buttons)
+    -- Create a Tasklist
+    tasklist[s] = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, tasklist.buttons)
+    
     -- Create the wibox
     mywibox[s] = awful.wibox({      screen = s,
         fg = beautiful.fg_normal, height = 16,
-        bg = beautiful.bg_normal, position = "top",
+        -- bg = beautiful.bg_normal, position = "top",
+        bg = beautiful.bg_normal, position = "bottom",
         border_color = beautiful.border_normal,
         border_width = beautiful.border_width
     })
@@ -394,30 +430,31 @@ for s = 1, screen.count() do
   left_layout:add(mypromptbox[s])
 
   local middle_layout = wibox.layout.fixed.horizontal()
-  middle_layout:add(mpdwidget and spacer, mpdwidget or nil)
+  middle_layout:add(tasklist[s])
+  -- middle_layout:add(mpdwidget and spacer, mpdwidget or nil)
 
 
   local right_layout = wibox.layout.fixed.horizontal()
 
   if cpugraph_enable and cpugraph then
-    if separator then right_layout:add(separator) end
-    right_layout:add(cpuicon)
-    right_layout:add(cpuwidget)
-    right_layout:add(cpugraph)
+    if separator then left_layout:add(separator) end
+    left_layout:add(cpuicon)
+    left_layout:add(cpuwidget)
+    left_layout:add(cpugraph)
   end
 
   if tzfound and tzwidth then
-    if separator then right_layout:add(separator) end
-    right_layout:add(tzfound)
-    right_layout:add(tzswidget)
+    if separator then left_layout:add(separator) end
+    left_layout:add(tzfound)
+    left_layout:add(tzswidget)
   end
 
   
   if membar_enable and memtext and membar then
-    if separator then right_layout:add(separator) end
-    right_layout:add(memicon)
-    right_layout:add(memtext)
-    right_layout:add(membar)
+    if separator then left_layout:add(separator) end
+    left_layout:add(memicon)
+    left_layout:add(memtext)
+    left_layout:add(membar)
   end
 
 
@@ -430,10 +467,10 @@ for s = 1, screen.count() do
 
 
   if dnicon and upicon and netwidget then
-    if separator then right_layout:add(separator) end
-    right_layout:add(dnicon)
-    right_layout:add(netwidget)
-    right_layout:add(upicon)
+    if separator then left_layout:add(separator) end
+    left_layout:add(dnicon)
+    left_layout:add(netwidget)
+    left_layout:add(upicon)
   end
 
 
@@ -522,7 +559,7 @@ globalkeys = awful.util.table.join(
         end),
 
     -- Standard program
-    awful.key({ modkey, "Shift"   }, "Return", function () awful.util.spawn(terminal) end),
+    awful.key({ modkey,           }, "Return", function () awful.util.spawn(terminal) end),
     awful.key({ modkey, "Control" }, "r", awesome.restart),
     awful.key({ modkey, "Shift"   }, "q", awesome.quit),
 
@@ -541,6 +578,7 @@ globalkeys = awful.util.table.join(
 
     -- Prompt
     awful.key({ modkey },            "r",     function () mypromptbox[mouse.screen]:run() end),
+	awful.key({ modkey }, "F1", function () awful.util.spawn("dmenu_run -fn 10 -b") end),
 
     awful.key({ modkey }, "x",
               function ()
@@ -608,9 +646,17 @@ for i = 1, keynumber do
                   end))
 end
 
+movebuttons = awful.util.table.join(
+  --awful.mouse.client_under_pointer().focus:raise(),
+  awful.button({ }, 1, function (c) client.focus = c; c:raise() end),
+  awful.button({ }, 1, awful.mouse.client.move),
+  awful.button({ }, 3, awful.mouse.client.resize))
+
 clientbuttons = awful.util.table.join(
     awful.button({ }, 1, function (c) client.focus = c; c:raise() end),
     awful.button({ modkey }, 1, awful.mouse.client.move),
+    awful.button({ }, 6, awful.mouse.client.move),
+    awful.button({ }, 7, awful.mouse.client.resize),
     awful.button({ modkey }, 3, awful.mouse.client.resize))
 
 -- Set keys
@@ -627,9 +673,48 @@ awful.rules.rules = {
       border_color = beautiful.border_normal }
     },
     { rule = { class = "ROX-Filer" },   properties = { floating = true } },
+    { rule = { class = "MPlayer" },   properties = { size_hintes_honor = true, floating = true, tag = tags[1][9], buttons = movebuttons, border_width = 0 } },
     { rule = { class = "Chromium-browser" },   properties = { floating = false } },
     { rule = { class = "Google-chrome" },   properties = { floating = false } },
     { rule = { class = "Firefox" },   properties = { floating = false } },
+	{ rule = { class = "xbmc.bin" },
+	properties = { size_hints_honor = true, floating = true, tag = tags[1][10] } },
+	{ rule = { class = "Zathura" },
+	properties = { tag = tags[1][8] } },
+	{ rule = { class = "Opera", instance = "opera" },
+	properties = { tag = tags[1][2] } },
+	{ rule = { class = "Deadbeef" },
+	properties = { tag = tags[1][8] } },
+	{ rule = { class = "VirtualBox" },
+	properties = { tag = tags[1][7] } },
+	{ rule = { class = "Gvim" },
+	properties = { size_hints_honor = true, tag = tags[1][8] } },
+	{ rule = { class = "feh" },
+	properties = { floating = true,size_hints_honor = true, } },
+	{ rule = { class = "Stardict" },
+	properties = { floating = true } },
+	{ rule = { class = "pinentry" },
+	properties = { floating = true } },
+	{ rule = { class = "Firefox" },
+	properties = { tag = tags[1][3] } },
+	{ rule = { class = "Firefox", instance = "Download" },
+	properties = { floating = true } },
+	{ rule = { class = "Firefox", instance = "Browser" },
+	properties = { floating = true } },
+	{ rule = { class = "Firefox", instance = "Toplevel" },
+	properties = { floating = true } },
+	{ rule = { class = "Firefox", instance = "Places" },
+	properties = { floating = true } },
+	{ rule = { class = "Thunderbird", instance = "Mail" },
+	properties = { floating = true, above = true } },
+	{ rule = { class = "Thunderbird", instance = "Calendar" },
+	properties = { floating = true, above = true } },
+	{ rule = { class = "Thunderbird", instance = "Msgcompose" },
+	properties = { floating = true, above = true } },
+	{ rule = { class = "Thunar" },
+	properties = { tag = tags[1][7] } },
+	{ rule = { class = "Gimp" },
+	properties = { floating = true, tag = tags[1][10] } }
 }
 -- }}}
 
