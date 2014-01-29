@@ -37,7 +37,7 @@ wallpaper_dir = os.getenv("HOME") .. "/Pictures/Wallpaper" -- wallpaper dir
 taglist_numbers = "chinese" -- we support arabic (1,2,3...),
 
 cpugraph_enable = true -- Show CPU graph
-cputext_format = " $1%" -- %1 average cpu, %[2..] every other thread individually
+cputext_format = "$1%" -- %1 average cpu, %[2..] every other thread individually
 
 membar_enable = true -- Show memory bar
 memtext_format = " $1%" -- %1 percentage, %2 used %3 total %4 free
@@ -54,13 +54,13 @@ require_safe('personal')
 -- }}}
 
 -- {{{ Variable definitions
-local wallpaper_cmd = "find " .. wallpaper_dir .. " -type f -name '*.jpg'  -print0 | shuf -n1 -z | xargs -0 feh --bg-scale"
+local wallpaper_cmd = "find " .. wallpaper_dir .. " -type f -name '002b36.jpg'  -print0 | shuf -n1 -z | xargs -0 feh --bg-center"
 local home   = os.getenv("HOME")
 local exec   = awful.util.spawn
 local sexec  = awful.util.spawn_with_shell
 
 -- Beautiful theme
-beautiful.init(awful.util.getdir("config") .. "/themes/zhongguo/zhongguo.lua")
+beautiful.init(awful.util.getdir("config") .. "/themes/zhongguo_nice/zhongguo_nice.lua")
 
 -- Window management layouts
 layouts = {
@@ -401,8 +401,8 @@ for s = 1, screen.count() do
         fg = beautiful.fg_normal, height = 16,
         -- bg = beautiful.bg_normal, position = "top",
         bg = beautiful.bg_normal, position = "bottom",
-        border_color = beautiful.border_normal,
-        border_width = beautiful.border_width
+        -- border_color = beautiful.border_normal,
+        -- border_width = beautiful.border_width
     })
     -- Add widgets to the wibox
     mywibox[s].widgets = {
@@ -458,12 +458,12 @@ for s = 1, screen.count() do
   end
 
 
-  if fs.r and fs.s and fsicon then
-    if separator then right_layout:add(separator) end
-    right_layout:add(fsicon)
-    right_layout:add(fs.r)
-    right_layout:add(fs.s)
-  end
+--  if fs.r and fs.s and fsicon then
+--    if separator then right_layout:add(separator) end
+--    right_layout:add(fsicon)
+--    right_layout:add(fs.r)
+--    right_layout:add(fs.s)
+--  end
 
 
   if dnicon and upicon and netwidget then
@@ -471,6 +471,7 @@ for s = 1, screen.count() do
     left_layout:add(dnicon)
     left_layout:add(netwidget)
     left_layout:add(upicon)
+	left_layout:add(separator)
   end
 
 
@@ -482,11 +483,11 @@ for s = 1, screen.count() do
   end
 
 
-  if baticon and batwidget then
-    if separator then right_layout:add(separator) end
-    right_layout:add(baticon)
-    right_layout:add(batwidget)
-  end
+--  if baticon and batwidget then
+--    if separator then right_layout:add(separator) end
+--    right_layout:add(baticon)
+--    right_layout:add(batwidget)
+--  end
 
   if separator then right_layout:add(separator) end
   right_layout:add(dateicon)
