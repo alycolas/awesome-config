@@ -54,7 +54,7 @@ require_safe('personal')
 -- }}}
 
 -- {{{ Variable definitions
-local wallpaper_cmd = "find " .. wallpaper_dir .. " -type f -name '002b36.jpg'  -print0 | shuf -n1 -z | xargs -0 feh --bg-center"
+local wallpaper_cmd = "find " .. wallpaper_dir .. " -type f -name '*.jpg'  -print0 | shuf -n1 -z | xargs -0 feh --bg-center"
 local home   = os.getenv("HOME")
 local exec   = awful.util.spawn
 local sexec  = awful.util.spawn_with_shell
