@@ -483,11 +483,11 @@ for s = 1, screen.count() do
   end
 
 
---  if baticon and batwidget then
---    if separator then right_layout:add(separator) end
---    right_layout:add(baticon)
---    right_layout:add(batwidget)
---  end
+  if baticon and batwidget then
+    if separator then right_layout:add(separator) end
+    right_layout:add(baticon)
+    right_layout:add(batwidget)
+  end
 
   if separator then right_layout:add(separator) end
   right_layout:add(dateicon)
