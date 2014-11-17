@@ -141,7 +141,7 @@ if cpugraph_enable then
 	})
 
 	-- Register graph widget
-	vicious.register(cpugraph,  vicious.widgets.cpu,      "$1")
+	vicious.register(cpugraph,  vicious.widgets.cpu,   "$1")
 end
 
 -- cpu text widget
@@ -419,7 +419,7 @@ for s = 1, screen.count() do
         separator, fs.r.widget, fs.s.widget, fsicon,
         separator, memtext, membar_enable and membar.widget or nil, memicon,
         separator, tzfound and tzswidget or nil,
-        cpugraph_enable and cpugraph.widget or nil, cpuwidget, cpuicon,
+        cpugraph_enable and cpugraph.widget or nil, separator, cpuwidget, cpuicon,
     }
 
 
